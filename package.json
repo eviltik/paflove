@@ -1,0 +1,24 @@
+{
+  "name": "paflove",
+  "version": "0.0.0",
+  "description": "XR FPS Game POC",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com//eviltik/paflove.git"
+  },
+  "author": "eviltik",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "1.19.1",
+    "connect": "3.7.0",
+    "cookie-session": "2.0.0",
+    "fs-extra": "10.0.0",
+    "open": "8.4.0",
+    "pem": "1.14.4",
+    "serve-static": "1.14.2"
+  }
+}
