@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <script src="js/aframe.1.2.0.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component@1.2.0/dist/aframe-environment-component.min.js"></script>
+
+</head>
+  <body>
+    <a-scene stats environment="preset:tron">
+
+        <a-assets>
+            <video id="webcam" playsinline crossorigin="anonymous"></video>
+        </a-assets>
+
+        <a-sky color="#ECECEC"></a-sky>
+
+        <a-box src= "#webcam"  position="11  8 0" rotation="0 90 0"  width ="15" height = "10"></a-box>
+
+        <a-camera>
+            <a-cursor></a-cursor>
+        </a-camera>
+    </a-scene>
+
+    
+    <script type="text/javascript">
+        function startCam() {
+            // You can also set which camera to use (front/back/etc)
+            // @SEE https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+            navigator
+                .mediaDevices
+                .getUserMedia({audio: false, video: true})
+                .then(stream => {
+                    var video = document.querySelector('video')
+                    video.srcObject = stream
+                    video.onloadedmetadata = () => {
+                        video.play()
+                    }
+                })
+        }
+
+        startCam();
+    </script>
+    
+  </body>
+</html>
