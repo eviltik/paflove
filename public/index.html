@@ -6,19 +6,23 @@
     <script src="https://unpkg.com/aframe-event-set-component@3.0.3/dist/aframe-event-set-component.min.js"></script>
     <script src="https://unpkg.com/aframe-environment-component@1.2.0/dist/aframe-environment-component.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <script src="https://unpkg.com/aframe-datgui-component/dist/aframe-datgui-component.min.js"></script>
 
-    
-    
     <script type="module">
-        AFRAME.registerComponent('walk', {
-          isVelocityActive: function () {
-            return false;
-          },
-          getPositionDelta: function () {
-            return new THREE.Vector3(1, 0, 0);
-          }
+
+        AFRAME.registerComponent('hide-in-vr-mode', {
+            // Set this object invisible while in VR mode.
+            init: function () {
+                this.el.sceneEl.addEventListener('enter-vr', (ev) => {
+                    this.el.setAttribute('visible', false);
+                });
+                this.el.sceneEl.addEventListener('exit-vr', (ev) => {
+                    this.el.setAttribute('visible', true);
+                });
+            }
         });
     </script>
+
 </head>
   <body>
     <a-scene log="console: false" stats="false" environment="preset:tron">
@@ -41,8 +45,6 @@
         <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
         <a-plane position="0 0.01 -4" rotation="-90 0 0" width="40" height="40" color="#7BC8A4"></a-plane>
 
-
-
         <!-- player -->
         <a-entity movement-controls="speed:0.3" id="player" position="0 0 0">
 
@@ -52,9 +54,9 @@
                 <!-- target -->
                 <a-cursor></a-cursor>
 
-                <!-- gun for non VR device, should be moved when entering XR mode --> 
+                <!-- gun for non VR device, should be moved in the right hand when entering XR mode --> 
                 <a-entity
-                    id="m16" 
+                    id="gunpc" hide-in-vr-mode
                     obj-model="obj: #m16-obj; mtl: #m16-mtl" 
                     scale="0.01 0.01 0.01" 
                     position="0.3 -0.3 -0.5"
@@ -63,21 +65,44 @@
 
             </a-camera>
 
+            <!--
             <a-entity id="tracked" tracked-controls="controller: 0; idPrefix: OpenVR"></a-entity>
 
             <a-entity laser-controls raycaster="objects: .links; far: 50; lineColor: red; lineOpacity: 0.9"></a-entity>
             <a-entity id="leftHand" laser-controls="hand: left;"></a-entity>
             <a-entity id="rightHand" laser-controls="hand: right;"></a-entity>
+            -->
+
+            <a-entity id="leftHand" hand-controls="hand:left">
+                <a-entity position="0 0.5 -0.5" rotation="-45 0 0"></a-entity>
+            </a-entity>
+
+            <a-entity id="rightHand" hand-controls="hand:right">
+                <a-entity position="0 0.5 -0.5" rotation="-45 0 0">
+                    <!-- gun for VR device, should be moved in the right hand when entering XR mode --> 
+                    <a-entity
+                        id="gunvr" 
+                        obj-model="obj: #m16-obj; mtl: #m16-mtl" 
+                        scale="0.01 0.01 0.01" 
+                        position="0 -0 -0"
+                        rotation="0 -90 -45">
+                    </a-entity>
+                </a-entity>
+            </a-entity>
 
         </a-entity>
 
+        <!-- debug log -->
         <a-entity position="2 1.6 -1">
             <a-entity log geometry="primitive: plane" material></a-entity>
             <a-entity log="channel: foo" geometry="primitive: plane" material></a-entity>
         </a-entity>
 
+        
+        <a-entity datgui="foo: bar"></a-entity>
+
         <!-- https://stackoverflow.com/questions/60336076/a-frame-superhands-custom-hand-model -->
-        <a-mixin id="controllers-right" oculus-touch-controls="hand: right" gltf-model="./Models/Hand.glb"  scale="0.05 0.05 0.05"></a-mixin>
+        <!-- <a-mixin id="controllers-right" oculus-touch-controls="hand: right" gltf-model="./Models/Hand.glb"  scale="0.05 0.05 0.05"></a-mixin> -->
 
     </a-scene>
 
