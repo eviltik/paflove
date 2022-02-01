@@ -20,7 +20,7 @@ function getIpAddress() {
     for ( const name of Object.keys( nets ) ) {
         for ( const net of nets[name] ) {
             // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
-            if ( net.family === 'IPv4' && !net.internal && name.match( /wi-fi/i ) ) {
+            if ( net.family === 'IPv4' && !net.internal && name.match( /wi-fi|eth0/i ) ) {
                 ip = net.address;
             }
         }
@@ -92,6 +92,8 @@ function readCertificates( options, callback ) {
 
     
     if ( !options.key || !options.cert ) {
+
+        fs.ensureDirSync( path.join( homePath, 'certs') );
 
         generateSSLCertificates( ( err, opts ) => {
 
