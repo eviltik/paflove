@@ -1,17 +1,20 @@
 AFRAME.registerPrimitive('a-log', {
+
     defaultComponents: {
-      geometry: {primitive: 'plane', height: 5},
+      geometry: {primitive: 'plane',  width:0.5, height: 0.35},
       log: {},
       material: {color: '#111', shader: 'flat', side: 'double'},
-      text: {color: 'lightgreen', baseline: 'top', align: 'center', height: 5}
+      text: {color: 'lightgreen', baseline: 'top', align: 'left', anchor:'center', width:0.5, }
     },
   
     mappings: {
       channel: 'log.channel'
     }
+
   });
   
   AFRAME.registerSystem('log', {
+
     schema: {
       console: {default: true}
     },

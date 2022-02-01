@@ -1,176 +1,163 @@
 <html>
   <head>
     <script src="vendors/aframe/aframe.1.2.0.min.js"></script>
-    <script src="js/logger.js"></script>
 
     <script src="https://unpkg.com/aframe-event-set-component@3.0.3/dist/aframe-event-set-component.min.js"></script>
     <script src="https://unpkg.com/aframe-environment-component@1.2.0/dist/aframe-environment-component.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
-    <script src="https://unpkg.com/aframe-datgui-component/dist/aframe-datgui-component.min.js"></script>
+    <script src="https://mixedreality.mozilla.org/ammo.js/builds/ammo.wasm.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-axes-helper-component@1.0.2/index.js"></script>
+    <script src="https://unpkg.com/aframe-slice9-component/dist/aframe-slice9-component.min.js"></script>
+
+    <script src="vendors/three/RGBELoader.js"></script>
+
+    <script src="js/logger.js"></script>
+    <script src="js/boot.js"></script>
+    <script src="js/enter-xr-hide.js"></script>
+    <script src="js/hdri.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/gun.js"></script>
+    <script src="js/vr-controllers.js"></script>
+    <script src="js/mouse-handler.js"></script>
+    <script src="js/gltf-ammo.js"></script>
+
 
     <script type="module">
 
-        AFRAME.registerComponent('hide-in-vr-mode', {
-            // Set this object invisible while in VR mode.
-            init: function () {
-                this.el.sceneEl.addEventListener('enter-vr', (ev) => {
-                    this.el.setAttribute('visible', false);
-                });
-                this.el.sceneEl.addEventListener('exit-vr', (ev) => {
-                    this.el.setAttribute('visible', true);
-                });
+        AFRAME.registerComponent('updater', {
+            
+            init: function() {
+                this.num = 0;
+            },
+            tick: function (time, timeDelta) {
+                this.num += 1;
+                this.el.setAttribute("text", "value", "Tick counter: " + this.num+"\n"+Date.now())
             }
+            
         });
+
     </script>
 
 </head>
   <body>
-    <a-scene log="console: false" stats="false" environment="preset:tron">
+    <a-scene 
+        id="scene"
+        log="console: false" 
+        backgroundx="color: cyan"
+        stats="false" 
+        environmentx="preset:tron" 
+        physics="gravity:-9.8; restitution:0.3; driver: ammo; debug: false; debugDrawMode: 1;"
+        renderer="antialias: true; colorManagement: true;physicallyCorrectLights: true;"
+        mouse-handler
+        hdri
+        >
 
         <a-assets>
-            <!-- preloaded items -->
+            
+            <!-- preloaded items 
+            <a-asset-item id="cityModel1" src="/3d/map/Citadel.gltf"></a-asset-item>
+            <a-asset-item id="cityModel2" src="/3d/map/Freight.gltf"></a-asset-item>
+            <a-asset-item id="cityModel3" src="/3d/map/industry.glb"></a-asset-item>
+            <a-asset-item id="cityModel4" src="/3d/map/Kanji.gltf"></a-asset-item>
+            <a-asset-item id="cityModel5" src="/3d/map/Littletown.gltf"></a-asset-item>
+            <a-asset-item id="cityModel6" src="/3d/map/Lostworld.gltf"></a-asset-item>
+            <a-asset-item id="cityModel7" src="/3d/map/Newtown.gltf"></a-asset-item>
+            <a-asset-item id="cityModel8" src="/3d/map/Oasis.gltf"></a-asset-item>
+            <a-asset-item id="cityModel10" src="/3d/map/Shipyard.gltf"></a-asset-item>
+            <a-asset-item id="cityModel11" src="/3d/map/Subzero.gltf"></a-asset-item>
+            <a-asset-item id="cityModel12" src="/3d/map/Undergrowth.gltf"></a-asset-item>
+             <a-asset-item id="cityModel9" src="/3d/map/Sandstorm.gltf"></a-asset-item>
+                         <a-asset-item id="hdri01" src="/3d/textures/hdri/spiaggia_di_mondello_4k.hdr"></a-asset-item>
+
+            -->
+
+            <a-asset-item id="space02" src="/3d/scenes/space03-4k.glb"></a-asset-item>
+
             <a-asset-item id="m16-obj" src="/3d/guns/m16/m16.obj"></a-asset-item>
             <a-asset-item id="m16-mtl" src="/3d/guns/m16/m16.mtl"></a-asset-item>
+
+            <audio id="shoot1" src="/sounds/M4A1_Single-Kibblesbob-8540445.wav" preload="true" autoplay="false"></audio>
+
         </a-assets>
 
+        <a-entity gltf-model="#space02"></a-entity>
+        
         <!-- sky -->
-        <a-sky color="#ECECEC"></a-sky>
+        <a-skyx color="#ECECEC" visible="false"></a-skyx>
+
+        <a-entity light="type: ambient; color: #A0A0A0;intensity:10"></a-entity>
+
+        <a-mixin id="collision" dynamic-body collision-filter="group: group1; collidesWith: group1"></a-mixin>
 
         <!-- scene -->
-        <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"
-            event-set__enter="_event: mouseenter; color: #8FF7FF"
+        <a-box ammo-body="type: dynamic" ammo-shape="type: box" position="-1 2.5 -3" rotation="0 45 0" color="#4CC3D9"
+            event-set__enter="_event: mouseenter; color: red"
             event-set__leave="_event: mouseleave; color: #4CC3D9">
         </a-box>
-        <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
-        <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
-        <a-plane position="0 0.01 -4" rotation="-90 0 0" width="40" height="40" color="#7BC8A4"></a-plane>
+        <a-sphere ammo-body="type: dynamic" ammo-shape="type: box" position="0 2.25 -5" radius="1.25" color="#EF2D5E" datgui="foo:bar" class="interactable"></a-sphere>
+        <a-cylinder ammo-body="type: dynamic" ammo-shape="type: box" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" class="interactable">
+            <!-- <a-entity axes-helper="size:10"></a-entity> -->
+        </a-cylinder>
+        <a-plane ammo-body="type: static;" ammo-shape="type: box;" position="0 0.01 -4" rotation="-90 0 0" width="40" height="40" color="#7BC8A4" visible="false"></a-plane>
+        
+        <!-- debug log -->
+        <a-entity position="1.5 1.6 -1" log="max:10" geometry="primitive: plane" slice9="opacity:0.1; padding:2;height:0.48;width:1"></a-entity>
 
         <!-- player -->
-        <a-entity movement-controls="speed:0.3" id="player" position="0 0 0">
+        <a-entity movement-controls="speed:0.3" id="player" player position="0 0 0" ammo-body="type: kinematic" ammo-shape="type: capsule; cylinderAxis: z;">
 
             <!-- eyes (main camera) -->
             <a-camera id="camera" wasd-controls="acceleration: 0" look-controls="pointerLockEnabled: true" position="0 1.6 0">
 
                 <!-- target -->
-                <a-cursor></a-cursor>
+                <a-cursor enter-xr-hide></a-cursor>
 
-                <!-- gun for non VR device, should be moved in the right hand when entering XR mode --> 
-                <a-entity
-                    id="gunpc" hide-in-vr-mode
-                    obj-model="obj: #m16-obj; mtl: #m16-mtl" 
-                    scale="0.01 0.01 0.01" 
-                    position="0.3 -0.3 -0.5"
-                    rotation="0 -90 0">
+                <a-entity id="gunContainerScreen">
+                    <a-entity
+                        id="gun"
+                        gun="positionScreenRight: 0.3 -0.3 -0.5; rotationScreenRight: 0 -90 0; positionVRRight: -0.005 -0.58 -0; rotationVRRight: 0 -80 -45; reparentVR:#gunContainerVR"
+                    ></a-entity>
                 </a-entity>
+
+                <a-entityx
+                    position="0 -0.39 -0.5"
+                    geometry="primitive: plane; width: 2.91; height:0.05"
+                    material="color: #444444; transparent: true; opacity: 0.5;"
+		            text="anchor: center; baseline: center; wrapCount: 300; transparent: true; opacity: 0.90; color: #AAAAFF; value: Tick Counter: ???"
+		            updater>
+	            </a-entityx>
 
             </a-camera>
 
-            <!--
-            <a-entity id="tracked" tracked-controls="controller: 0; idPrefix: OpenVR"></a-entity>
+            <a-entity 
+                id="gunsound" 
+                sound="src: #shoot1; poolSize:40; positional:false; maxDistance:100;"
+            ></a-entity>
 
-            <a-entity laser-controls raycaster="objects: .links; far: 50; lineColor: red; lineOpacity: 0.9"></a-entity>
+            <!--
+            <a-entity laser-controls raycaster="objects: .clickable; far: 50; lineColor: red; lineOpacity: 0.9"></a-entity>
+            <a-entity id="tracked" tracked-controls="controller: 0; idPrefix: OpenVR"></a-entity>
             <a-entity id="leftHand" laser-controls="hand: left;"></a-entity>
             <a-entity id="rightHand" laser-controls="hand: right;"></a-entity>
             -->
 
-            <a-entity id="leftHand" hand-controls="hand:left">
+            <a-entity id="leftHand" hand-controls="hand:left" vr-controllers>
                 <a-entity position="0 0.5 -0.5" rotation="-45 0 0"></a-entity>
             </a-entity>
 
-            <a-entity id="rightHand" hand-controls="hand:right">
-                <a-entity position="0 0.5 -0.5" rotation="-45 0 0">
-                    <!-- gun for VR device, should be moved in the right hand when entering XR mode --> 
-                    <a-entity
-                        id="gunvr" 
-                        obj-model="obj: #m16-obj; mtl: #m16-mtl" 
-                        scale="0.01 0.01 0.01" 
-                        position="0 -0 -0"
-                        rotation="0 -90 -45">
-                    </a-entity>
+            <a-entity id="rightHand" hand-controls="hand:right" raycaster="objects: .collidable" vr-controllers>
+                <a-entity id="gunContainerVR" position="0 0.5 -0.5" rotation="-45 0 0">
+
                 </a-entity>
             </a-entity>
 
         </a-entity>
 
-        <!-- debug log -->
-        <a-entity position="2 1.6 -1">
-            <a-entity log geometry="primitive: plane" material></a-entity>
-            <a-entity log="channel: foo" geometry="primitive: plane" material></a-entity>
-        </a-entity>
-
-        
-        <a-entity datgui="foo: bar"></a-entity>
-
-        <!-- https://stackoverflow.com/questions/60336076/a-frame-superhands-custom-hand-model -->
-        <!-- <a-mixin id="controllers-right" oculus-touch-controls="hand: right" gltf-model="./Models/Hand.glb"  scale="0.05 0.05 0.05"></a-mixin> -->
+        <!-- <a-entity gltf-ammo="model:#cityModel9" class="collidable" id="ground" scale="0.1 0.1 0.1" position="0 -8 0" mixin="collision"></a-entity> -->
+        <!-- <a-entity raycaster="objects: .collidable" cursor></a-entity> -->
 
     </a-scene>
-
-    
-    <script type="module">
-        
-        import * as player from './js/player.js';
-        
-        // random player location when page loaded
-        //player.setRandomPosition(-5, 5);
-
-        function onControllerConnected() {
-            AFRAME.log('onControllerConnected', arguments);
-        }
-
-        function onAxisMove() {
-            AFRAME.log('onAxisMove', arguments);
-        }
-
-        function onButtonChanged() {
-            AFRAME.log('onButtonChanged', arguments);
-        }
-
-        function onButtonDown() {
-            AFRAME.log('onButtonDown', arguments);
-        }
-
-        function onButtonUp() {
-            AFRAME.log('onButtonUp', arguments);
-        }
-
-        function onTouchStart() {
-            AFRAME.log('onTouchStart', arguments);
-        }
-
-        function onTouchEnd() {
-            AFRAME.log('onTouchEnd', arguments);
-        }
-
-        function attach(elName) {
-            const el = document.querySelector(elName);
-            if (!el) {
-                AFRAME.log('attach: could not find '+elName);
-                return;
-            }
-
-            el.addEventListener("controllerconnected", onControllerConnected, false);
-            el.addEventListener("axismove", onAxisMove, false);
-            el.addEventListener("buttonchanged", onButtonChanged, false);
-            el.addEventListener("buttondown", onButtonDown, false);
-            el.addEventListener("buttonup", onButtonUp, false);
-            el.addEventListener("touchstart", onTouchStart, false);
-            el.addEventListener("touchend", onTouchEnd, false);
-
-            AFRAME.log('attach: events attached to '+elName);
-            
-        }
-
-        //attach('#tracked');
-        attach('#leftHand');
-        attach('#rightHand');
-        
-
-        setTimeout(() => {
-            AFRAME.log('hello');
-        });
-
-    </script>
     
   </body>
 </html>
