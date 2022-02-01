@@ -1,4 +1,5 @@
 AFRAME.registerComponent('gltf-ammo', {
+    
     schema: {
         model: {default: ''},
         body: {type: 'string', default: 'static'}, //dynamic: A freely-moving object.
