@@ -3,7 +3,7 @@ AFRAME.registerComponent('hdri', {
     schema: {
         path: {type:'string', default: '/3d/textures/hdri/'},
         fileId: {type: 'string', default: 'spiaggia_di_mondello'}, // file without end "_4k.hdr"
-        resolution: {type:'string', default:'4k'},
+        resolution: {type:'string', default:'2k'},
         extension: {type:'string', default:'.hdr'}
     },
 
