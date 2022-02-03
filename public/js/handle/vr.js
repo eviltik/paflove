@@ -1,4 +1,6 @@
-AFRAME.registerComponent('vr-controllers', {
+AFRAME.registerComponent('handle-vr', {
+    
+    multiple:true, 
     
     schema:{
         rotate_thumbstick_angle_min: { default:0.23, type:"number" },
@@ -49,12 +51,12 @@ AFRAME.registerComponent('vr-controllers', {
 
     onAxisMove: function (ev) {
 
-        AFRAME.log('onAxisMove')
-
         if (!ev.target.id.match(this.reRightHand)) {
             return;
         }
-        
+
+        AFRAME.log('onAxisMove')
+
         this.thumbstickDistanceX = ev.detail.axis[2];
         this.thumbstickDistanceY = ev.detail.axis[3];
 
@@ -85,25 +87,41 @@ AFRAME.registerComponent('vr-controllers', {
     },
 
     onButtonChanged: function (ev) {
-            
+        
+        console.log('onButtonChanged', ev);
+
+
         if ( !ev || !ev.detail ) {
             return;
         }
 
-        AFRAME.log('onButtonChanged: id' + ev.detail.id);
-        AFRAME.log('onButtonChanged: state.value=' + ev.detail.state.value);
+        AFRAME.log(`onButtonChanged: el=${ev.target.id}, id=${ev.detail.id}, state.value=${ev.detail.state.value}`);
 
         const OCULUS_BUTTON_TRIGGER = 0;
+        const OCULUS_BUTTON_STICK = 3;
 
-        if (ev.detail.id === OCULUS_BUTTON_TRIGGER) {
-            
-            if (ev.detail.state) {
-                if (ev.detail.state.value > 0.20) {
-                    this.player.startShooting();
+        if (ev.target.id.match(this.reRightHand)) {
+            if (ev.detail.id === OCULUS_BUTTON_TRIGGER) {
+                if (ev.detail.state) {
+                    if (ev.detail.state.value > 0.20) {
+                        this.player.startShooting();
+                    } else {
+                        this.player.stopShooting();
+                    }
+                }
+
+            }
+        } else {
+            if (ev.detail.id === OCULUS_BUTTON_STICK) {
+                if (ev.detail.state.value === 0) {
+                    AFRAME.log('stop running!');
+                    this.player.stopRunning();
                 } else {
-                    this.player.stopShooting();
+                    AFRAME.log('start running!');
+                    this.player.startRunning();
                 }
             }
+
         }
     }
 

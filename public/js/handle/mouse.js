@@ -1,4 +1,7 @@
-AFRAME.registerComponent('mouse-handler', {
+AFRAME.registerComponent('handle-mouse', {
+
+    multiple:false,
+    
     init: function () {
 
         this.playerEl = document.querySelector('#player');

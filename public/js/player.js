@@ -19,16 +19,25 @@ AFRAME.registerComponent('player', {
         this.gunsound = document.querySelector('#gunsound');
         this.gun = document.querySelector('#gun');
 
+        this.speedWalk = this.player.components['movement-controls'].data.speed || 0.15;
+        this.speedRun = this.speedWalk*2.5;
+
         // player status
         this.status = {
             rotating:false,
-            shooting:false
+            shooting:false,
+            running:false
         }
 
         // public methods
         this.startShooting = AFRAME.utils.bind(this.startShooting, this);
         this.stopShooting = AFRAME.utils.bind(this.stopShooting, this);
+
+        this.startRunning = AFRAME.utils.bind(this.startRunning, this);
+        this.stopRunning = AFRAME.utils.bind(this.stopRunning, this);
+
         this.shooting = AFRAME.utils.bind(this.shooting, this);
+        this.running = AFRAME.utils.bind(this.running, this);
         this.rotate = AFRAME.utils.bind(this.rotate, this);
 
         this.FLY_MODE = false;
@@ -67,42 +76,35 @@ AFRAME.registerComponent('player', {
 
     },
 
-    setRandomLocation: function (min, max) {
-    
-        if (!this.player) {
-            throw new Error('Could not set player random location, #player not found');
-        }
+    startRunning: function() {
 
-        const newNocation = {
+        if (this.status.running) return;
 
-            // random X
-            x: this.getRandomInt(min, max),
+        //console.log('start running', Date.now());
+        AFRAME.log('player: start running '+Date.now());
+        
+        this.status.running = true;
+        this.running();
+        this.runningInterval = setInterval(this.running, 90);
+        this.player.components['movement-controls'].data.speed = this.speedRun;
 
-            // for now, setRandomLocation only called in immersive mode, so
-            // rather than 1.6 as defined initialy in index.html, 
-            // switching immersive mode set the camera to 1.6 or something 
-            // automatically. So we MUST set 0 here.
-            y: 0,
-
-            // random Y
-            z: this.getRandomInt(min, max)
-
-        }
-
-        // we don't care about speed here (setAttribute is supposed to be slow)
-        this.player.setAttribute('position', newNocation);
-    
     },
 
-    rotate: function (thumbstickDistanceX) {
+    stopRunning: function() {
 
-        if (this.status.rotating)  {
-            return;
-        }
+        if (!this.status.running) return;
 
-        AFRAME.log(`rotate: thumbstickDistanceX=${thumbstickDistanceX} `);
+        AFRAME.log('player:stopRunning'+ Date.now());
+        
+        this.status.running = false;
+        clearInterval(this.runningInterval);
+        this.player.components['movement-controls'].data.speed = this.speedWalk;
 
-        this.rotateStart(thumbstickDistanceX);
+    },
+
+    running: function() {
+
+
 
     },
 
@@ -117,6 +119,18 @@ AFRAME.registerComponent('player', {
             // move down
             this.player.object3D.position.y += this.data.player_translate_vertical;
         }
+
+    },
+
+    rotate: function (thumbstickDistanceX) {
+
+        if (this.status.rotating)  {
+            return;
+        }
+
+        AFRAME.log(`rotate: thumbstickDistanceX=${thumbstickDistanceX} `);
+
+        this.rotateStart(thumbstickDistanceX);
 
     },
 
@@ -145,6 +159,33 @@ AFRAME.registerComponent('player', {
 
         this.status.rotating = false;
 
+    },
+
+    setRandomLocation: function (min, max) {
+    
+        if (!this.player) {
+            throw new Error('Could not set player random location, #player not found');
+        }
+
+        const newNocation = {
+
+            // random X
+            x: this.getRandomInt(min, max),
+
+            // for now, setRandomLocation only called in immersive mode, so
+            // rather than 1.6 as defined initialy in index.html, 
+            // switching immersive mode set the camera to 1.6 or something 
+            // automatically. So we MUST set 0 here.
+            y: 0,
+
+            // random Y
+            z: this.getRandomInt(min, max)
+
+        }
+
+        // we don't care about speed here (setAttribute is supposed to be slow)
+        this.player.setAttribute('position', newNocation);
+    
     },
 
     getRandomInt: function (min, max) {

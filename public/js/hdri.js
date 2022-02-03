@@ -26,9 +26,15 @@ AFRAME.registerComponent('hdri', {
         THREE.ACESFilmicToneMapping
         */
 
-        this.el.sceneEl.renderer.toneMapping = THREE.CineonToneMapping;
+        this.el.sceneEl.renderer.toneMapping = THREE.LinearToneMapping;
         this.el.sceneEl.renderer.toneMappingExposure = 0.5;
         this.el.sceneEl.renderer.outputEncoding = THREE.sRGBEncoding;
+        
+        /*
+        this.el.sceneEl.renderer.shadowMap.enabled = true;
+		this.el.sceneEl.renderer.shadowMapSoft = true;
+        this.el.sceneEl.renderer.shadowMapType = THREE.PCFSoftShadowMap;
+        */
 
     },
 
