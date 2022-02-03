@@ -24,10 +24,13 @@ AFRAME.registerComponent('loadmap', {
         this.el.addEventListener('model-loaded', (ev) => {
         
             ev.detail.model.traverse( function( node ) {
+
+                console.log('loadmap:',node.name);
+
                 if (node.name === 'navmesh') {
                     //node.material.transparent = true;
                     //node.material.opacity = 0.5;
-                    //node.material.visible = false;
+                    node.material.visible = false;
 
                 } else if ( node.isMesh ) {
 
