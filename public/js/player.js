@@ -18,10 +18,7 @@ AFRAME.registerComponent('player', {
         this.player = document.querySelector("#player");
         this.gunsound = document.querySelector('#gunsound');
         this.gun = document.querySelector('#gun');
-
-        this.speedWalk = this.player.components['movement-controls'].data.speed || 0.15;
-        this.speedRun = this.speedWalk*2.5;
-
+    
         // player status
         this.status = {
             rotating:false,
@@ -39,9 +36,17 @@ AFRAME.registerComponent('player', {
         this.shooting = AFRAME.utils.bind(this.shooting, this);
         this.running = AFRAME.utils.bind(this.running, this);
         this.rotate = AFRAME.utils.bind(this.rotate, this);
+        this.onRenderStart = AFRAME.utils.bind(this.onRenderStart, this);
 
         this.FLY_MODE = false;
 
+        this.el.sceneEl.addEventListener('renderstart', this.onRenderStart);
+
+    },
+
+    onRenderStart: function() {
+        this.speedWalk = this.player.components['movement-controls'].data.speed || 0.15;
+        this.speedRun = this.speedWalk*2.5;
     },
 
     startShooting: function () {
