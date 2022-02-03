@@ -86,8 +86,13 @@ AFRAME.registerComponent('gun', {
 
     loadGun: function(gunId) {
 
+        console.log('gun: loadGun', gunId);
+
         if (gunId === 'm16') {
             this.el.setAttribute('obj-model',"obj: #m16-obj; mtl: #m16-mtl");
+            this.el.setAttribute('scale', "0.01 0.01 0.01");
+        } else if (gunId === 'm16-2') {
+            this.el.setAttribute('gltf-model',"#m16-glb");
             this.el.setAttribute('scale', "0.01 0.01 0.01");
         } else {
             throw new Error('gun:loadGun: error, only m16 is implemented');

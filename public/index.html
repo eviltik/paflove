@@ -89,8 +89,9 @@
             <a-asset-item id="mymap" src="/3d/scenes/space05-pbr.glb"></a-asset-item>
             <a-asset-item id="mymapNavmesh" src="/3d/scenes/navmesh.glb"></a-asset-item>
 
-            <a-asset-item id="m16-obj" src="/3d/guns/m16/m16.obj"></a-asset-item>
-            <a-asset-item id="m16-mtl" src="/3d/guns/m16/m16.mtl"></a-asset-item>
+            <a-asset-item id="m16-obj" src="/3d/guns/m16-2/M16.obj"></a-asset-item>
+            <a-asset-item id="m16-mtl" src="/3d/guns/m16-2/M16.mtl"></a-asset-item>
+            <a-asset-item id="m16-glb" src="/3d/guns/m16-2/M16.glb"></a-asset-item>
 
             <audio id="shoot1" src="/sounds/M4A1_Single-Kibblesbob-8540445.wav" preload="true" autoplay="false"></audio>
 
@@ -133,7 +134,7 @@
                 <a-entity id="gunContainerScreen">
                     <a-entity
                         id="gun"
-                        gun="positionScreenRight: 0.3 -0.3 -0.5; rotationScreenRight: 0 -90 0; positionVRRight: -0.005 -0.58 -0; rotationVRRight: 0 -80 -45; reparentVR:#gunContainerVR"
+                        gun="model:m16-2;positionScreenRight: 0.3 -0.3 -0.5; rotationScreenRight: 0 0 0; positionVRRight: -0.005 -0.58 -0; rotationVRRight: 0 -80 -45; reparentVR:#gunContainerVR"
                     ></a-entity>
                 </a-entity>
 

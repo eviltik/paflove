@@ -94,7 +94,7 @@ AFRAME.registerComponent('player', {
 
         if (!this.status.running) return;
 
-        AFRAME.log('player:stopRunning'+ Date.now());
+        AFRAME.log('player: stop running'+ Date.now());
         
         this.status.running = false;
         clearInterval(this.runningInterval);
