@@ -1,7 +1,7 @@
 
 AFRAME.registerComponent('gun', {
     
-    multiple: false,
+    multiple: true,
 
     schema:{
         model:{
@@ -11,22 +11,6 @@ AFRAME.registerComponent('gun', {
         leftHanded:{
             default:false,
             type:'boolean'
-        },
-        positionScreenRight:{
-            default:'0.3 -0.3 -0.5',
-            type:'string'
-        },
-        rotationScreenRight:{
-            defaut:'0 -90 0',
-            type:'string'
-        },
-        positionVRRight:{ 
-            default:'-0.005 -0.58 -0',
-            type:'string'
-        },
-        rotationVRRight:{ 
-            default:'0 -80 -45',
-            type:'string'
         },
         reparentScreen:{
             default:'#gunContainerScreen',
@@ -38,12 +22,36 @@ AFRAME.registerComponent('gun', {
         }
     },
 
+    guns:{
+        'm16':{
+            modelType:'obj-model',
+            modelSrc:"obj: #m16-obj; mtl: #m16-mtl",
+            positionScreenRight:'0.3 -0.3 -0.5',
+            rotationScreenRight:'0 0 0',
+            positionVRRight:'-0.005 -0.58 -0',
+            rotationVRRight:'0 -80 -45',
+            scale:"0.01 0.01 0.01",
+        },
+        'm16-2':{
+            modelType:'gltf-model',
+            modelSrc:"#m16-glb",
+            positionScreenRight:'0.15 -0.3 -0.40',
+            rotationScreenRight:'0 0 0',
+            positionVRRight:'-0.005 0.58 -0',
+            rotationVRRight:'0 -10 -45',
+            scale:"0.01 0.01 0.01"
+        }
+    },
+
     init: function () {
 
-        if (AFRAME.gunLoaded) return;
+        if (AFRAME.gunLoaded) {
+            return;
+        }
 
         AFRAME.gunLoaded = true;
 
+        this.gun = null;
         this.onEnterVR = AFRAME.utils.bind(this.onEnterVR, this);
         this.onExitVR = AFRAME.utils.bind(this.onExitVR, this);
         this.reparent = AFRAME.utils.bind(this.reparent, this);
@@ -56,51 +64,36 @@ AFRAME.registerComponent('gun', {
         this.el.sceneEl.addEventListener('enter-vr', this.onEnterVR);
         this.el.sceneEl.addEventListener('exit-vr', this.onExitVR);
 
-        this.loadGun(this.data.model);
-
         this.immersive = false;
         this.gunContainerScreen = document.querySelector(this.data.reparentScreen);
         this.gunContainerVR = document.querySelector(this.data.reparentVR);
 
-        if (this.data.leftHanded) {
-
-            this.positionScreen = AFRAME.utils.coordinates.parse(this.data.positionScreenLeft);
-            this.rotationScreen = AFRAME.utils.coordinates.parse(this.data.rotationScreenLeft);
-            this.positionVR = AFRAME.utils.coordinates.parse(this.data.positionVRLeft);
-            this.rotationVR = AFRAME.utils.coordinates.parse(this.data.rotationVRLeft);
-
-        } else {
-
-            this.positionScreen = AFRAME.utils.coordinates.parse(this.data.positionScreenRight);
-            this.rotationScreen = AFRAME.utils.coordinates.parse(this.data.rotationScreenRight);
-            this.positionVR = AFRAME.utils.coordinates.parse(this.data.positionVRRight);
-            this.rotationVR = AFRAME.utils.coordinates.parse(this.data.rotationVRRight);
-        
-            console.log(this.rotationScreen);
-        }
-
-        console.log('init');
+        this.showGun(this.data.model);
         this.displayForScreen();
 
     },
 
-    loadGun: function(gunId) {
 
-        console.log('gun: loadGun', gunId);
+    showGun: function(gunId) {
 
-        if (gunId === 'm16') {
-            this.el.setAttribute('obj-model',"obj: #m16-obj; mtl: #m16-mtl");
-            this.el.setAttribute('scale', "0.01 0.01 0.01");
-        } else if (gunId === 'm16-2') {
-            this.el.setAttribute('gltf-model',"#m16-glb");
-            this.el.setAttribute('scale', "0.01 0.01 0.01");
-        } else {
-            throw new Error('gun:loadGun: error, only m16 is implemented');
+        console.log('gun: showGun', gunId);
+
+        this.gun = this.guns[gunId];
+        if (!this.gun) {
+            throw new Error('gun:loadGun: unknow gun id'+gunId);
         }
+2
+        this.el.setAttribute(this.gun.modelType, this.gun.modelSrc);
+        this.el.setAttribute('scale', this.gun.scale);
+        this.el.setAttribute('position', this.gun.positionScreenRight);
+        this.el.setAttribute('rotation', this.gun.rotationScreenRight);
 
     },
 
     reparent: function(el, newParent, newPosition, newRotation) {
+
+        newPosition = AFRAME.utils.coordinates.parse(newPosition);
+        newRotation = AFRAME.utils.coordinates.parse(newRotation);
 
         // credits: https://stackoverflow.com/questions/65538916/aframe-reparenting-an-element-keeping-its-world-position-rotation
         console.log('gun:reparent', el, newParent, newPosition, newRotation);
@@ -125,7 +118,7 @@ AFRAME.registerComponent('gun', {
         // Listener for location, rotation,... when the new el is laded
         function relocate() {
             console.log('gun:relocate', newPosition, newRotation, newScale);
-            newEl.object3D.location = newPosition;
+            newEl.object3D.position = newPosition;
             newEl.object3D.rotation = newRotation;
             newEl.object3D.scale = newScale;
         }
@@ -135,6 +128,10 @@ AFRAME.registerComponent('gun', {
         el.parentEl.removeChild(this.el);
 
         this.el = newEl;
+
+        //const laser = document.createElement('a-entity');
+        //laser.setAttribute('raycaster', 'showLine: true; far: 100; lineColor: red; lineOpacity: 0.5;');
+        //newEl.appendChild(laser);
           
     },
 
@@ -147,17 +144,13 @@ AFRAME.registerComponent('gun', {
 
     reparentForScreen() {
 
-        this.reparent(this.el, this.gunContainerScreen, this.positionScreen, this.rotationScreen);
-        this.el.setAttribute('position', this.positionScreen);
-        this.el.setAttribute('rotation', this.rotationScreen);
+        this.reparent(this.el, this.gunContainerScreen, this.gun['positionScreenRight'], this.gun['rotationScreenRight']);
 
     },
 
     reparentForVR() {
 
-        this.reparent(this.el, this.gunContainerVR, this.positionVR, this.rotationVR);
-        this.el.setAttribute('position', this.positionVR);
-        this.el.setAttribute('rotation', this.rotationVR);
+        this.reparent(this.el, this.gunContainerVR, this.gun['positionVRRight'], this.gun['rotationVRRight']);
 
     },
 
@@ -176,6 +169,11 @@ AFRAME.registerComponent('gun', {
     displayForVR: function() {
 
         console.log('gun:displayForVR', this.positionVR, this.rotationVR);
+
+        this.positionScreen = AFRAME.utils.coordinates.parse(gun.positionScreenRight);
+        this.rotationScreen = AFRAME.utils.coordinates.parse(gun.rotationScreenRight);
+        this.positionVR = AFRAME.utils.coordinates.parse(gun.positionVRRight);
+        this.rotationVR = AFRAME.utils.coordinates.parse(gun.rotationVRRight);
 
         if (this.el.getObject3D('mesh')) {
             this.reparentForVR();
