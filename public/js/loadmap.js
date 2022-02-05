@@ -2,8 +2,9 @@ AFRAME.registerComponent('loadmap', {
     
     schema: {
         model: {default: ''},
-        body: {type: 'string', default: 'static'}, //dynamic: A freely-moving object.
+        body: {type: 'string', default: 'static'}, //[static, dynamic]: A freely-moving object.
         shape: {type: 'string', default: 'hull'}, // hull: Wraps a model in a convex hull, like a shrink-wrap
+        navmesh:{type:'string', default: null} // [only]
     },
 
     init: function () {
@@ -19,28 +20,43 @@ AFRAME.registerComponent('loadmap', {
   
         // Waiting for model to load before adding ammo-shape (box, cylinder, sphere, capsule, cone, hull, mesh)
         
-        let children;
+        const showNavMeshOnly = this.data.navmesh === 'only';
 
         this.el.addEventListener('model-loaded', (ev) => {
         
             ev.detail.model.traverse( function( node ) {
 
-                console.log('loadmap:',node.name);
+                console.log('loadmap: traversing ',node.name);
 
-                if (node.name === 'navmesh') {
+                if ( !node.material ) return;
+
+                if ( node.name === 'navmesh' ) {
                     
                     //node.material.transparent = true;
                     //node.material.opacity = 0.5;
                     
-                    node.material.visible = false;
+                    if ( showNavMeshOnly ) {
+
+                        node.material.visible = true;
+
+                    } else {
+
+                        node.material.visible = false;
+
+                    }
 
                 } else if ( node.isMesh ) {
 
+                    if ( showNavMeshOnly ) {
+                        node.material.visible = false;
+                    }
+
+                    if ( node.material.map ) {
+                        node.material.map.anisotropy = 16;
+                    }
+
                     //node.castShadow = true;
                     //node.receiveShadow = true;
-                    if (node.material.map) {
-                        node.material.map.anisotropy = 16;
-                    } 
 
                 }
         
