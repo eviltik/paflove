@@ -3,172 +3,20 @@
 
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width,initial-scale=1,shrink-to-fit=no,user-scalable=no,maximum-scale=1"
-    />
-
-    <!-- <script src="vendors/aframe/aframe.1.2.0.min.js"></script> -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <!--<script src="https://aframe.io/releases/1.0.3/aframe.min.js"></script>-->
-
-    <script src="https://unpkg.com/aframe-event-set-component@3.0.3/dist/aframe-event-set-component.min.js"></script>
-    <script src="https://unpkg.com/aframe-environment-component@1.2.0/dist/aframe-environment-component.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
-
-    <script src="https://mixedreality.mozilla.org/ammo.js/builds/ammo.wasm.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
-    
-    <script src="https://unpkg.com/aframe-axes-helper-component@1.0.2/index.js"></script>
-    <script src="https://unpkg.com/aframe-slice9-component/dist/aframe-slice9-component.min.js"></script>
-
-    <script src="vendors/three/RGBELoader.js"></script>
-
-    <script src="js/logger.js"></script>
-    <script src="js/boot.js"></script>
-    <script src="js/enter-xr-hide.js"></script>
-    <script src="js/hdri.js"></script>
-    <script src="js/player.js"></script>
-    <script src="js/gun.js"></script>
-    <script src="js/handle/vr.js"></script>
-    <script src="js/handle/mouse.js"></script>
-    <script src="js/handle/keyboard.js"></script>
-    <script src="js/loadmap.js"></script>
-
-
-    <script type="module">
-
-        AFRAME.registerComponent('updater', {
-            
-            init: function() {
-                this.num = 0;
-            },
-            tick: function (time, timeDelta) {
-                this.num += 1;
-                this.el.setAttribute("text", "value", "Tick counter: " + this.num+"\n"+Date.now())
-            }
-            
-        });
-
-    </script>
+    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no,user-scalable=no,maximum-scale=1"/>
 
 </head>
   <body>
-    <a-scene 
-        id="scene"
-        log="console: false" 
-        backgroundx="color: cyan"
-        stats="false" 
-        environmentx="preset:tron" 
-        physics="gravity:-9.8; restitution:0.3; driver: ammo; debug: false; debugDrawMode: 1;"
-        renderer="antialias: true; colorManagement: true;physicallyCorrectLights: false;"
-        handle-mouse
-        handle-keyboard
-        hdri="resolution:1k;fileId:spiaggia_di_mondello"
-        >
-
-        <a-assets>
-            
-            <!-- preloaded items 
-            <a-asset-item id="cityModel1" src="/3d/map/Citadel.gltf"></a-asset-item>
-            <a-asset-item id="cityModel2" src="/3d/map/Freight.gltf"></a-asset-item>
-            <a-asset-item id="cityModel3" src="/3d/map/industry.glb"></a-asset-item>
-            <a-asset-item id="cityModel4" src="/3d/map/Kanji.gltf"></a-asset-item>
-            <a-asset-item id="cityModel5" src="/3d/map/Littletown.gltf"></a-asset-item>
-            <a-asset-item id="cityModel6" src="/3d/map/Lostworld.gltf"></a-asset-item>
-            <a-asset-item id="cityModel7" src="/3d/map/Newtown.gltf"></a-asset-item>
-            <a-asset-item id="cityModel8" src="/3d/map/Oasis.gltf"></a-asset-item>
-            <a-asset-item id="cityModel10" src="/3d/map/Shipyard.gltf"></a-asset-item>
-            <a-asset-item id="cityModel11" src="/3d/map/Subzero.gltf"></a-asset-item>
-            <a-asset-item id="cityModel12" src="/3d/map/Undergrowth.gltf"></a-asset-item>
-             <a-asset-item id="cityModel9" src="/3d/map/Sandstorm.gltf"></a-asset-item>
-                         <a-asset-item id="hdri01" src="/3d/textures/hdri/spiaggia_di_mondello_4k.hdr"></a-asset-item>
-
-            -->
-
-            <a-asset-item id="mymap" src="/3d/scenes/space05-pbr.glb"></a-asset-item>
-            <a-asset-item id="mymapNavmesh" src="/3d/scenes/navmesh.glb"></a-asset-item>
-
-            <a-asset-item id="m16-obj" src="/3d/guns/m16-2/M16.obj"></a-asset-item>
-            <a-asset-item id="m16-mtl" src="/3d/guns/m16-2/M16.mtl"></a-asset-item>
-            <a-asset-item id="m16-glb" src="/3d/guns/m16-2/M16.glb"></a-asset-item>
-
-            <audio id="shoot1" src="/sounds/M4A1_Single-Kibblesbob-8540445.wav" preload="true" autoplay="false"></audio>
-
-        </a-assets>
-
-        <a-entity loadmap="model:#mymap;shape:mesh"></a-entity>
-        <a-entity light="type:ambient;color:#FFFFFF;intensity:0.1"></a-entity>
-        <a-entity light="type:point;color:#FFFFFF;intensity:1;castShadow:true;" position="0 2 0" ></a-entity>
-
-        <!-- basic shapes -->
-        <a-box ammo-body="type: dynamic" ammo-shape="type: box" position="-1 2.5 -3" rotation="0 45 0" color="#4CC3D9"
-            event-set__enter="_event: mouseenter; color: red"
-            event-set__leave="_event: mouseleave; color: #4CC3D9">
-        </a-box>
-        <a-sphere ammo-body="type: dynamic" ammo-shape="type: box" position="6 2.25 -5" radius="1.25" color="#EF2D5E" datgui="foo:bar" class="interactable"></a-sphere>
-        <a-cylinder ammo-body="type: dynamic" ammo-shape="type: box" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" class="interactable"></a-cylinder>
-        <a-entity axes-helper="size:1" visible="false"></a-entity>
-
-        <!-- debug log -->
-        <a-entity position="1.5 1.6 -1" log="max:10" geometry="primitive: plane" slice9="opacity:0.1; padding:2;height:0.48;width:1"></a-entity>
-
-        <!-- player -->
-        <a-entity 
-            movement-controls="constrainToNavMesh: true; speed: 0.15" 
-            key-for-run 
-            id="player" 
-            player 
-            class="collidable" 
-            position="0 0 0" 
-            ammo-body="type: kinematic" 
-            ammo-shape="type: capsule; cylinderAxis: z;"
-            >
-
-            <!-- eyes (main camera) -->
-            <a-camera id="camera" wasd-controls="acceleration: 0" look-controls="pointerLockEnabled: true" position="0 1.6 0">
-
-                <!-- target -->
-                <a-cursor enter-xr-hide></a-cursor>
-
-                <a-entity id="gunContainerScreen">
-                    <a-entity
-                        id="gun"
-                        gun="model:m16-2;positionScreenRight: 0.3 -0.3 -0.5; rotationScreenRight: 0 0 0; positionVRRight: -0.005 -0.58 -0; rotationVRRight: 0 -80 -45; reparentVR:#gunContainerVR"
-                    ></a-entity>
-                </a-entity>
-
-
-                <a-entity light="type: point; color: #ffffff;intensity:0.4" visible="false"></a-entity>
-
-            </a-camera>
-
-            <a-entity sound="src: #shoot1; poolSize:40; positional:false; maxDistance:100;" id="gunsound" visible="false"></a-entity>
-
-            <!--
-            <a-entity laser-controls raycaster="objects: .clickable; far: 50; lineColor: red; lineOpacity: 0.9"></a-entity>
-            <a-entity id="tracked" tracked-controls="controller: 0; idPrefix: OpenVR"></a-entity>
-            <a-entity id="leftHand" laser-controls="hand: left;"></a-entity>
-            <a-entity id="rightHand" laser-controls="hand: right;"></a-entity>
-            -->
-
-            <a-entity id="leftHand" hand-controls="hand:left" handle-vr>
-                <a-entity position="0 0.5 -0.5" rotation="-45 0 0"></a-entity>
-            </a-entity>
-
-            <a-entity id="rightHand" hand-controls="hand:right" raycaster="objects: .collidable" handle-vr>
-                <a-entity id="gunContainerVR" position="0 0.5 -0.5" rotation="-45 0 0">
-
-                </a-entity>
-            </a-entity>
-
-        </a-entity>
-
-        <!-- <a-entity gltf-ammo="model:#mymapNavmesh;body:static;shape:mesh" class="collidable" id="ground" position="0 0 0" visible="false"></a-entity>-->
-        <!-- <a-entity raycaster="objects: .collidable" cursor></a-entity> -->
-        <!-- <a-plane ammo-body="type: static;" ammo-shape="type: box;" position="0 -10 0" rotation="-90 0 0" width="100" height="100" color="#7BC8A4" visible="true"></a-plane> -->
-
-    </a-scene>
     
+    <p>Paflove, WEBXR FPS POC using JS only (aframe/three/js/node). Currently under development. No alpha, beta, rc, niet.</p>
+    <ul>
+        <li><a href="/aframe-demos/ingame/">ingame</a></li>
+        <li><a href="/aframe-demos/setup-environment/">setup-environment</a></li>
+        <li><a href="/aframe-demos/webcam/">webcam</a></li>
+        <li><a href="/aframe-demos/bug/">inverted controller bug</a></li>
+
+    </ul>
+    
+
   </body>
 </html>
