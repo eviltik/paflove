@@ -9074,7 +9074,7 @@ module.exports = AFRAME.registerComponent('gamepad-controls', {
         var xrController = this.system.controllers[i];
         var xrGamepad = xrController ? xrController.gamepad : null;
         _xrGamepads.push(xrGamepad);
-        if (xrGamepad && xrGamepad.handedness === handPreference) return xrGamepad;
+        if (xrGamepad && xrController.handedness === handPreference) return xrGamepad;
       }
 
       // https://developer.mozilla.org/en-US/docs/Web/API/Gamepad/hand
