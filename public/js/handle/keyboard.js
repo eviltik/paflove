@@ -22,7 +22,8 @@ AFRAME.registerComponent('handle-keyboard', {
     },
 
     installHandlers: function () {
-        console.log('keyboard-handler:installHandlers');
+
+        console.log('keyboard-handler:installHandlers keyup/down');
         document.body.addEventListener('keydown', this.onKeyDown);
         document.body.addEventListener('keyup', this.onKeyUp);
 
@@ -30,6 +31,7 @@ AFRAME.registerComponent('handle-keyboard', {
 
     removeHandlers: function () {
         
+        console.log('keyboard-handler:removeHandlers keyup/down');
         document.body.removeEventListener('keydown', this.onKeyDown);
         document.body.removeEventListener('keyup', this.onKeyUp);
 

@@ -5,10 +5,10 @@ AFRAME.registerComponent('player', {
     schema: {
 
         // player rotation
-        player_rotate_thumbstick_angle_min: { default:0.23, type:"number" },
+        player_rotate_thumbstick_angle_min: { default:0.25, type:"number" },
         player_rotate_angle: { default:(Math.PI/6), type:"number" },
-        player_rotate_pause_ms: { default:200, type:"int" },
-        player_translate_vertical: { default:0.2, type:"number" },
+        player_rotate_pause_ms: { default:230, type:"int" },
+        player_translate_vertical: { default:0.1, type:"number" },
 
     },
 
@@ -45,8 +45,10 @@ AFRAME.registerComponent('player', {
     },
 
     onRenderStart: function() {
+
         this.speedWalk = this.player.components['movement-controls'].data.speed || 0.15;
         this.speedRun = this.speedWalk*2.5;
+
     },
 
     startShooting: function () {
@@ -76,7 +78,7 @@ AFRAME.registerComponent('player', {
     shooting: function() {
 
         AFRAME.log('player:shooting');
-        this.gunsound.components.sound.playSound();
+        //this.gunsound.components.sound.playSound();
         //this.gun.setAttribute('animation',"property: rotation; to: 0 0 1; loop: false; dur: 100");
 
     },
@@ -85,8 +87,7 @@ AFRAME.registerComponent('player', {
 
         if (this.status.running) return;
 
-        //console.log('start running', Date.now());
-        AFRAME.log('player: start running '+Date.now());
+        AFRAME.log(`player: start running @${Date.now()}: speedRun = ${this.speedRun}, current = ${this.player.components['movement-controls'].data.speed}`);
         
         this.status.running = true;
         this.running();
@@ -99,8 +100,8 @@ AFRAME.registerComponent('player', {
 
         if (!this.status.running) return;
 
-        AFRAME.log('player: stop running'+ Date.now());
-        
+        AFRAME.log(`player: stop running @${Date.now()}: speedWalk = ${this.speedWalk}, current = ${this.player.components['movement-controls'].data.speed}`);        
+
         this.status.running = false;
         clearInterval(this.runningInterval);
         this.player.components['movement-controls'].data.speed = this.speedWalk;
@@ -115,7 +116,7 @@ AFRAME.registerComponent('player', {
 
     moveUpOrDown: function(thumbstickDistanceY) {
 
-        AFRAME.log('moveUpOrDown');
+        AFRAME.log(`player: moveUpOrDown: thumbstickDistanceY=${thumbstickDistanceY} `);
 
         if ( thumbstickDistanceY > 0 ) {
             // move up
@@ -133,7 +134,7 @@ AFRAME.registerComponent('player', {
             return;
         }
 
-        AFRAME.log(`rotate: thumbstickDistanceX=${thumbstickDistanceX} `);
+        AFRAME.log(`player: rotate: thumbstickDistanceX=${thumbstickDistanceX} `);
 
         this.rotateStart(thumbstickDistanceX);
 
@@ -141,7 +142,7 @@ AFRAME.registerComponent('player', {
 
     rotateStart: function (thumbstickDistanceX) {
 
-        AFRAME.log('rotateStart');
+        AFRAME.log(`player: rotateStart: thumbstickDistanceX=${thumbstickDistanceX} `);
 
         this.status.rotating = true;
         

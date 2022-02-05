@@ -13,7 +13,12 @@ AFRAME.registerComponent('handle-vr', {
         this.player = null;
                 
         // precompiled regular expression to fetch for right hand (ev.target.id)
-        this.reRightHand = new RegExp('right','i');
+        this.isRightHand = this.el.id.match(/right/i);
+        if (this.isRightHand) {
+            this.handName = 'right';
+        } else {
+            this.handName = 'left';
+        }
 
         this.onRenderStart = AFRAME.utils.bind(this.onRenderStart, this);
         this.onControllerConnected = AFRAME.utils.bind(this.onControllerConnected, this);
@@ -29,39 +34,36 @@ AFRAME.registerComponent('handle-vr', {
 
     onRenderStart: function() {
 
-        //AFRAME.log('vr-controllers:onRenderStart');
+        AFRAME.log(`handle-vr: ${this.handName}: onRenderStart`);
         this.player = this.playerEl.components.player;
 
     },
 
     installListeners: function () {
 
-        AFRAME.log('vr-controllers:installListeners');
+        AFRAME.log(`handle-vr: ${this.handName}: installListeners`);
+
         this.el.addEventListener("controllerconnected", this.onControllerConnected, false);
-        this.el.addEventListener("axismove", this.onAxisMove, false);
         this.el.addEventListener("buttonchanged", this.onButtonChanged, false);
+
+        if (this.isRightHand) {
+            this.el.addEventListener("axismove", this.onAxisMove, false);
+        }
 
     },
 
     onControllerConnected: function (ev) {
 
-        AFRAME.log('onControllerConnected '+ev.target.id);
+        AFRAME.log(`handle-vr: ${this.handName}: onControllerConnected ${ev.target.id}`);
 
     },
 
     onAxisMove: function (ev) {
 
-        if (!ev.target.id.match(this.reRightHand)) {
-            return;
-        }
-
-        AFRAME.log('onAxisMove')
+        AFRAME.log(`handle-vr: ${this.handName}: onAxisMove ${ev.target.id}`);
 
         this.thumbstickDistanceX = ev.detail.axis[2];
         this.thumbstickDistanceY = ev.detail.axis[3];
-
-        AFRAME.log(`rotate: thumbstickDistanceX=${this.thumbstickDistanceX} `);
-        AFRAME.log(`rotate: thumbstickDistanceY=${this.thumbstickDistanceY} `);
 
         if (Math.abs(this.thumbstickDistanceX) > this.data.rotate_thumbstick_angle_min) {
             this.player.rotate(this.thumbstickDistanceX);
@@ -75,32 +77,28 @@ AFRAME.registerComponent('handle-vr', {
     
     onButtonUp: function (ev) {
 
-        AFRAME.log('onButtonUp');
+        AFRAME.log(`handle-vr: ${this.handName}: onButtonUp ${ev.target.id}`);
 
     },
 
     onButtonDown: function (ev) {
 
-        console.log('onButtonDown', this, ev);
-        AFRAME.log('onButtonDown');
+        AFRAME.log(`handle-vr: ${this.handName}: onButtonDown ${ev.target.id}`);
         
     },
 
     onButtonChanged: function (ev) {
-        
-        console.log('onButtonChanged', ev);
-
 
         if ( !ev || !ev.detail ) {
             return;
         }
 
-        AFRAME.log(`onButtonChanged: el=${ev.target.id}, id=${ev.detail.id}, state.value=${ev.detail.state.value}`);
+        AFRAME.log(`handle-vr: ${this.handName}: onButtonChanged el=${ev.target.id}, id=${ev.detail.id}, state.value=${ev.detail.state.value}`);
 
         const OCULUS_BUTTON_TRIGGER = 0;
         const OCULUS_BUTTON_STICK = 3;
 
-        if (ev.target.id.match(this.reRightHand)) {
+        if (this.isRightHand) {
             if (ev.detail.id === OCULUS_BUTTON_TRIGGER) {
                 if (ev.detail.state) {
                     if (ev.detail.state.value > 0.20) {
@@ -114,10 +112,8 @@ AFRAME.registerComponent('handle-vr', {
         } else {
             if (ev.detail.id === OCULUS_BUTTON_STICK) {
                 if (ev.detail.state.value === 0) {
-                    AFRAME.log('stop running!');
                     this.player.stopRunning();
                 } else {
-                    AFRAME.log('start running!');
                     this.player.startRunning();
                 }
             }
