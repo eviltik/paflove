@@ -25,6 +25,7 @@ AFRAME.registerComponent('widget-list-menu', {
         htmlembed.setAttribute('htmlembed','');
         htmlembed.setAttribute('class','clickable');
         htmlembed.setAttribute('position',this.el.getAttribute('position'));
+        htmlembed.setAttribute('scale','0.5 0.5 0.5');
         htmlembed.setAttribute('material', 'opacity: 0.0; transparent: true');
         htmlembed.setAttribute('transparent', 'true');
         htmlembed.setAttribute('opacity', '0.1');
