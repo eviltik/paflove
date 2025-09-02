@@ -1,5 +1,6 @@
-const server = require( './server' );
+import { start } from './server.js';
+
 const port = 8443;
 
-server.start( port );
+start( port );
 

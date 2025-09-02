@@ -1,126 +1,118 @@
-const connect = require( 'connect' );
-const https = require( 'https' );
-const cookieSession = require( 'cookie-session' );
-const bodyParser = require( 'body-parser' );
-const serveStatic = require( 'serve-static' );
-const pem = require( 'pem' );
-const path = require( 'path' );
-const fs = require( 'fs-extra' );
-const log = require( './logger.js' );
-const open = require( 'open' );
-const networkInterfaces = require( 'os' ).networkInterfaces;
+import connect from 'connect';
+import https from 'https';
+import cookieSession from 'cookie-session';
+import bodyParser from 'body-parser';
+import serveStatic from 'serve-static';
+import pem from 'pem';
+import path from 'path';
+import fs from 'fs-extra';
+import log from './logger.js';
+import open from 'open';
+import { networkInterfaces } from 'os';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-function getIpAddress() {
-
+const getIpAddress = () => {
     const nets = networkInterfaces();
     let ip;
 
     for ( const name of Object.keys( nets ) ) {
         for ( const net of nets[name] ) {
             // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
-            if ( net.family === 'IPv4' && !net.internal && name.match( /wi-fi|eth0/i ) ) {
-                ip = net.address;
+            if ( net.family === 'IPv4' && !net.internal ) {
+                // Accept more interface names: wi-fi, eth0, enp*, wlan*, etc.
+                if ( name.match( /wi-fi|wlan|eth|enp|ens|eno/i ) ) {
+                    ip = net.address;
+                    break;
+                }
             }
+        }
+        if (ip) break;
+    }
+
+    // Fallback: if no specific interface found, use any non-internal IPv4
+    if ( !ip ) {
+        for ( const name of Object.keys( nets ) ) {
+            for ( const net of nets[name] ) {
+                if ( net.family === 'IPv4' && !net.internal ) {
+                    ip = net.address;
+                    break;
+                }
+            }
+            if (ip) break;
         }
     }
 
     if ( !ip ) {
-        throw new Error( 'Could not fetch Wi-Fi IP Address' );
+        throw new Error( 'Could not fetch IP Address' );
     }
 
     return ip;
-}
+};
 
-function getPackageName() {
-
-    const packageJsonFile = path.resolve( __dirname,'..', 'package.json' );
+const getPackageName = () => {
+    const packageJsonFile = path.resolve( new URL('.', import.meta.url).pathname, '..', 'package.json' );
     log.info( `getPackageName: reading ${packageJsonFile}` );
     return fs.readJsonSync( packageJsonFile ).name;
+};
 
-}
-
-function getHome() {
-    
+const getHome = () => {
     let home = process.env.APPDATA || ( process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + '/.local/share' );
     home = path.join( home, getPackageName() );
     log.info( `getHome: using path ${home}` );
     fs.ensureDirSync( home );
     return home;
+};
 
-}
-
-function generateSSLCertificates( callback ) {
-
+const generateSSLCertificates = async () => {
     log.info( 'generateSSLCertificates: generating new self signed SSL Certificates ...' );
 
-    pem.createCertificate( { days: 365, selfSigned: true }, ( err, keys ) => {
-        
-        if ( err ) {
-            throw err;
-        }
+    return new Promise((resolve, reject) => {
+        pem.createCertificate( { days: 365, selfSigned: true }, ( err, keys ) => {
+            if ( err ) {
+                reject(err);
+                return;
+            }
 
-        const opts = {};
-        opts.key = keys.serviceKey;
-        opts.cert = keys.certificate;
-        callback( null, opts );
+            const opts = {};
+            opts.key = keys.serviceKey;
+            opts.cert = keys.certificate;
+            resolve( opts );
+        });
+    });
+};
 
-    } );
-
-}
-
-function readCertificates( options, callback ) {
-
+const readCertificates = async ( options ) => {
     const homePath = getHome();
     const fileKey = path.join( homePath, 'certs', 'server.key' );
     const fileCrt = path.join( homePath, 'certs', 'server.crt' );
-    //const fileCa = path.join( homePath, 'certs', 'ca.crt' );
 
     try {
-
-        //log.info( `readCertificates: reading self signed private key ${fileKey}` );
-        //log.info( `readCertificates: reading self signed certificate ${fileCrt}` );
-
         options.key = fs.readFileSync( fileKey );
         options.cert = fs.readFileSync( fileCrt );
-        //options.ca = fs.readFileSync( fileCa );
-
     } catch( e ) {
         // file can not be read or does not exists
     }
 
-    
     if ( !options.key || !options.cert ) {
-
         fs.ensureDirSync( path.join( homePath, 'certs') );
 
-        generateSSLCertificates( ( err, opts ) => {
+        const opts = await generateSSLCertificates();
 
-            log.info( `readCertificates: writing self signed private key ${fileKey}` );
-            log.info( `readCertificates: writing self signed certificate ${fileCrt}` );
+        log.info( `readCertificates: writing self signed private key ${fileKey}` );
+        log.info( `readCertificates: writing self signed certificate ${fileCrt}` );
 
-            fs.writeFileSync( fileKey, opts.key.toString() );
-            fs.writeFileSync( fileCrt, opts.cert.toString() );
-            options.key = opts.key;
-            options.cert = opts.cert;
-            callback();
-        } );
-
+        fs.writeFileSync( fileKey, opts.key.toString() );
+        fs.writeFileSync( fileCrt, opts.cert.toString() );
+        options.key = opts.key;
+        options.cert = opts.cert;
     } else {
-
         log.info( `readCertificates: using self signed private key ${fileKey}` );
         log.info( `readCertificates: using self signed certificate ${fileCrt}` );
-
-        callback();
-
     }
-            
+};
 
-}
-
-function start( port, callback ) {
-    
+const start = async ( port, callback ) => {
     const serverOptions = {};
     const app = connect();
 
@@ -135,7 +127,7 @@ function start( port, callback ) {
     } ) );
     
     // static files
-    const docRoot = path.join( __dirname, '..', 'public' );
+    const docRoot = path.join( new URL('.', import.meta.url).pathname, '..', 'public' );
     log.info( `Start: using docroot ${docRoot} ` );
 
     const serve = serveStatic(
@@ -150,8 +142,7 @@ function start( port, callback ) {
 
     app.use( serve );
     
-    function serverStart() {
-        
+    const serverStart = () => {
         const ip = getIpAddress();
         log.info( `Webserver starting on ${ip}:${port}` );
 
@@ -166,14 +157,11 @@ function start( port, callback ) {
         open( `${url}` );
 
         callback && callback( null, server );
-    }
+    };
 
-    readCertificates( serverOptions, serverStart );
-
-
-}
-
-module.exports = {
-    start
+    await readCertificates( serverOptions );
+    serverStart();
 };
+
+export { start };
 

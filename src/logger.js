@@ -1,19 +1,19 @@
-const logger = {};
+const logger = {
+    info(...args) {
+        console.log(...args);
+    },
 
-logger.info = function() {
-    console.log.apply( console, arguments );
+    error(...args) {
+        console.log(...args);
+    },
+
+    debug(...args) {
+        console.log(...args);
+    },
+
+    warn(...args) {
+        console.log(...args);
+    }
 };
 
-logger.error = function() {
-    console.log.apply( console, arguments );
-};
-
-logger.debug = function() {
-    console.log.apply( console, arguments );
-};
-
-logger.warn = function() {
-    console.log.apply( console, arguments );
-};
-
-module.exports = logger;
+export default logger;
